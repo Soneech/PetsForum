@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Вопросы</h1>
+
+{% if current_user.is_authenticated %}
+        <a href="questions" class="btn btn-secondary">Задать вопрос</a>
+{% endif %}
+
+{% for item in questions%}
+<div class="col-md6 border rounded">
+    {% if current_user.is_authenticated and current_user == item.user %}
+    <div>
+        <a href="/questions/{{ item.id }}" class="btn btn-warning">Изменить</a>
+        <a href="/question_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>
+    </div>
+    {% endif %}
+    <h2>{{item.theme}}</h2>
+    <div>
+        {{item.content}}
+    </div>
+    <div>
+        Автор - {{item.user.name}}, Дата написания - {{item.created_date}}
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
