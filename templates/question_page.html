@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>{{ question.theme }}</h2>
+<h3>Автор - {{ user.name }}, <br> Дата написания - {{ question.created_date}}</h3>
+<div class="col-md6 border rounded">
+    {{ question.content }}
+</div>
+{% endblock %}

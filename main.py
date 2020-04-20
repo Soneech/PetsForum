@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, jsonify, make_response
+from flask import Flask, render_template, redirect, jsonify, make_response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import abort
 from data import db_session
@@ -23,10 +23,9 @@ def main():
 def index():
     session = db_session.create_session()
     if current_user.is_authenticated:
-        questions = session.query(Questions).filter(
-            (Questions.user == current_user) | (Questions.is_private != True))
+        questions = session.query(Questions).filter(Questions.user == current_user)
     else:
-        questions = session.query(Questions).filter(Questions.is_private != True)
+        questions = session.query(Questions)
 
     return render_template("index.html", questions=questions)
 
@@ -93,7 +92,6 @@ def create_question():
         question = Questions()
         question.theme = form.theme.data
         question.content = form.content.data
-        question.is_private = form.is_private.data
         current_user.questions.append(question)
         session.merge(current_user)
         session.commit()
@@ -102,33 +100,31 @@ def create_question():
                            form=form)
 
 
-# @app.route('/news/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# def edit_news(id):
-#     form = NewsForm()
-#     if request.method == "GET":
-#         session = db_session.create_session()
-#         news = session.query(News).filter(News.id == id,
-#                                           News.user == current_user).first()
-#         if news:
-#             form.title.data = news.title
-#             form.content.data = news.content
-#             form.is_private.data = news.is_private
-#         else:
-#             abort(404)
-#     if form.validate_on_submit():
-#         session = db_session.create_session()
-#         news = session.query(News).filter(News.id == id,
-#                                           News.user == current_user).first()
-#         if news:
-#             news.title = form.title.data
-#             news.content = form.content.data
-#             news.is_private = form.is_private.data
-#             session.commit()
-#             return redirect('/')
-#         else:
-#             abort(404)
-#     return render_template('news.html', title='Редактирование новости', form=form)
+@app.route('/edit_question/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_question(id):
+    form = QuestionsForm()
+    if request.method == "GET":
+        session = db_session.create_session()
+        question = session.query(Questions).filter(Questions.id == id,
+                                          Questions.user == current_user).first()
+        if question:
+            form.theme.data = question.theme
+            form.content.data = question.content
+        else:
+            abort(404)
+    if form.validate_on_submit():
+        session = db_session.create_session()
+        question = session.query(Questions).filter(Questions.id == id,
+                                          Questions.user == current_user).first()
+        if question:
+            question.theme = form.theme.data
+            question.content = form.content.data
+            session.commit()
+            return redirect('/')
+        else:
+            abort(404)
+    return render_template('questions.html', title='Редактирование вопроса', form=form)
 #
 #
 @app.route('/question_delete/<int:id>', methods=['GET', 'POST'])
@@ -145,14 +141,20 @@ def question_delete(id):
     return redirect('/')
 
 
-@app.route('/comment_question/<int:id>', methods=['GET', 'POST'])
+@app.route('/question_page/<int:id>', methods=['GET', 'POST'])
 @login_required
-def comment_question(id):
-    pass
+def question_page(id):
+    if request.method == 'GET':
+        session = db_session.create_session()
+        question = session.query(Questions).filter(Questions.id == id).first()
+        user = session.query(Users).filter(Users.id == question.user_id).first()
+        if question:
+            return render_template('question_page.html', question=question, user=user)
 
 
 @app.errorhandler(404)
 def not_found(error):
+    form = QuestionsForm()
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 

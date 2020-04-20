@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Добавление вопроса</h1>
+<h1>{{ title }}</h1>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     {{ form.csrf_token }}
@@ -23,7 +23,6 @@
             </p>
         {% endfor %}
     </p>
-    <p>{{ form.is_private() }} {{ form.is_private.label }}</p>
     <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
     {{message}}
 </form>
