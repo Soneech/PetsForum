@@ -4,7 +4,7 @@
 <h1>Вопросы</h1>
 
 {% if current_user.is_authenticated %}
-        <a href="questions" class="btn btn-secondary">Задать вопрос</a>
+        <a href="create_question" class="btn btn-secondary">Задать вопрос</a>
 {% endif %}
 
 {% for item in questions%}

@@ -1,5 +1,6 @@
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, jsonify, make_response
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_restful import abort
 from data import db_session
 from data.questions import Questions
 from data.users import Users
@@ -83,9 +84,9 @@ def logout():
     return redirect("/")
 
 
-@app.route('/questions',  methods=['GET', 'POST'])
+@app.route('/create_question',  methods=['GET', 'POST'])
 @login_required
-def add_question():
+def create_question():
     form = QuestionsForm()
     if form.validate_on_submit():
         session = db_session.create_session()
@@ -130,23 +131,29 @@ def add_question():
 #     return render_template('news.html', title='Редактирование новости', form=form)
 #
 #
-# @app.route('/news_delete/<int:id>', methods=['GET', 'POST'])
-# @login_required
-# def news_delete(id):
-#     session = db_session.create_session()
-#     news = session.query(News).filter(News.id == id,
-#                                       News.user == current_user).first()
-#     if news:
-#         session.delete(news)
-#         session.commit()
-#     else:
-#         abort(404)
-#     return redirect('/')
-#
-#
-# @app.errorhandler(404)
-# def not_found(error):
-#     return make_response(jsonify({'error': 'Not found'}), 404)
+@app.route('/question_delete/<int:id>', methods=['GET', 'POST'])
+@login_required
+def question_delete(id):
+    session = db_session.create_session()
+    question = session.query(Questions).filter(Questions.id == id,
+                                      Questions.user == current_user).first()
+    if question:
+        session.delete(question)
+        session.commit()
+    else:
+        abort(404)
+    return redirect('/')
+
+
+@app.route('/comment_question/<int:id>', methods=['GET', 'POST'])
+@login_required
+def comment_question(id):
+    pass
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 if __name__ == '__main__':
