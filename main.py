@@ -150,7 +150,8 @@ def question_page(id):
         user = session.query(Users).filter(Users.id == question.user_id).first()
         if question:
             return render_template('question_page.html', question=question, user=user)
-
+    if request.method == 'POST':
+        pass
 
 @app.errorhandler(404)
 def not_found(error):
