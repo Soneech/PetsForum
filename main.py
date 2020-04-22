@@ -2,10 +2,10 @@ from flask import Flask, render_template, redirect, jsonify, make_response, requ
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import abort
 from data import db_session
-from data.questions import Questions
 from data.users import Users
 from data.register import RegisterForm, LoginForm
 from data.questions import Questions, QuestionsForm
+from data.answers import Answers, AnswersForm
 
 
 app = Flask(__name__)
@@ -141,17 +141,59 @@ def question_delete(id):
     return redirect('/')
 
 
-@app.route('/question_page/<int:id>', methods=['GET', 'POST'])
+@app.route('/question_page/<int:id>', methods=['GET', 'POST'])  # страница с вопросом и ответами
 @login_required
 def question_page(id):
-    if request.method == 'GET':
+    form = AnswersForm()
+    session = db_session.create_session()
+    question = session.query(Questions).filter(Questions.id == id).first()
+    if question:
+        user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
+    else:
+        abort(404)
+
+    if form.validate_on_submit():
         session = db_session.create_session()
         question = session.query(Questions).filter(Questions.id == id).first()
-        user = session.query(Users).filter(Users.id == question.user_id).first()
-        if question:
-            return render_template('question_page.html', question=question, user=user)
-    if request.method == 'POST':
-        pass
+        user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
+
+        answer = Answers()
+        answer.content = form.content.data
+        answer.question_id = id
+        current_user.answers.append(answer)
+        session.merge(current_user)
+        session.commit()
+        form.content.data = ''
+
+    return render_template('question_page.html', question=question, user=user, form=form)
+
+
+@app.route('/delete_answer/<int:id>', methods=['GET', 'POST'])
+@login_required
+def delete_answer(id):
+    session = db_session.create_session()
+    answer = session.query(Answers).filter(Answers.id == id, Answers.user == current_user).first()
+    if answer:
+        session.delete(answer)
+        session.commit()
+    else:
+        abort(404)
+    return redirect('/')
+
+
+# @app.route('/create_answer', methods=['GET', 'POST'])
+# @login_required
+# def create_answer():
+#     form = AnswersForm()
+#     if form.validate_on_submit():
+#         session = db_session.create_session()
+#         answer = Answers()
+#         answer.content = form.content.data
+#         current_user.answers.append(answer)
+#         session.merge(current_user)
+#         session.commit()
+#         return redirect('/')
+
 
 @app.errorhandler(404)
 def not_found(error):

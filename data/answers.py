@@ -3,7 +3,7 @@ import datetime
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 from flask_wtf import FlaskForm
-from wtforms import TextAreaField
+from wtforms import TextAreaField, SubmitField
 
 from .db_session import SqlAlchemyBase
 
@@ -22,5 +22,6 @@ class Answers(SqlAlchemyBase, SerializerMixin):
     user = orm.relation('Users')
 
 
-class AnswersForm(FlaskForm):
+class AnswersForm(FlaskForm, SerializerMixin):
     content = TextAreaField('Ответить')
+    submit = SubmitField('Опубликовать')

@@ -4,7 +4,7 @@ from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired
-from wtforms import BooleanField, SubmitField, StringField, TextAreaField
+from wtforms import SubmitField, StringField, TextAreaField
 
 from .db_session import SqlAlchemyBase
 
@@ -19,6 +19,8 @@ class Questions(SqlAlchemyBase, SerializerMixin):
 
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey("users.id"))
     user = orm.relation('Users')
+
+    answers = orm.relation('Answers', back_populates='question')
 
 
 class QuestionsForm(FlaskForm, SerializerMixin):

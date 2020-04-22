@@ -22,8 +22,8 @@ class Users(SqlAlchemyBase, UserMixin, SerializerMixin):
     user_answers = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     rating = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
-    # jobs = orm.relation('Jobs', back_populates='user')
-    questions = orm.relation("Questions", back_populates='user')
+    questions = orm.relation('Questions', back_populates='user')
+    answers = orm.relation('Answers', back_populates='user')
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

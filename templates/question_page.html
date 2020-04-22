@@ -6,5 +6,34 @@
 <div class="col-md6 border rounded">
     {{ question.content }}
 </div>
+<br>
+<br>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    {{ form.csrf_token }}
+    <p>
+        {{ form.content.label }}<br>
+        {{ form.content(class="form-control") }}<br>
+        {% for error in form.content.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    {{message}}
+</form>
+
+{% for item in answers %}
+<div class="col-md6 border rounded">
+    {% if current_user.is_authenticated and current_user == item.user%}
+        <div>
+            <a href="/delete_answer/{{ item.id }}" class="btn btn-danger">Удалить</a>
+        </div>
+    {% endif %}
+    <h3>{{ item.user.name}}</h3>
+    <h3>{{ item.content }}</h3>
+</div>
+{% endfor %}
 
 {% endblock %}
