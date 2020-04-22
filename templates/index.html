@@ -9,13 +9,6 @@
 
 {% for item in questions%}
 <div class="col-md6 border rounded">
-    {% if current_user.is_authenticated and current_user == item.user %}
-    <div>
-        <a href="/edit_question/{{ item.id }}" class="btn btn-warning">Изменить</a>
-        <a href="/question_delete/{{ item.id }}" class="btn btn-danger">Удалить</a>
-        <a href="/question_page/{{ item.id }}" class="btn btn-success">Открыть</a>
-    </div>
-    {% endif %}
     <h2>{{item.theme}}</h2>
     <div>
         {{item.content}}
@@ -23,6 +16,13 @@
     <div>
         Автор - {{item.user.name}}, Дата написания - {{item.created_date}}
     </div>
+    {% if current_user.is_authenticated and current_user == item.user %}
+    <div>
+        <a href="/edit_question/{{ item.id }}" class="btn btn-warning">Изменить</a>
+        <a href="/delete_question/{{ item.id }}" class="btn btn-danger">Удалить</a>
+        <a href="/question_page/{{ item.id }}" class="btn btn-success">Открыть</a>
+    </div>
+    {% endif %}
 </div>
 {% endfor %}
 {% endblock %}

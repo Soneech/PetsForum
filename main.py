@@ -127,13 +127,16 @@ def edit_question(id):
     return render_template('questions.html', title='Редактирование вопроса', form=form)
 #
 #
-@app.route('/question_delete/<int:id>', methods=['GET', 'POST'])
+@app.route('/delete_question/<int:id>', methods=['GET', 'POST'])
 @login_required
 def question_delete(id):
     session = db_session.create_session()
     question = session.query(Questions).filter(Questions.id == id,
                                       Questions.user == current_user).first()
     if question:
+        answers = session.query(Answers).filter(Answers.question_id == id)
+        for item in answers:
+            session.delete(item)
         session.delete(question)
         session.commit()
     else:
@@ -147,6 +150,7 @@ def question_page(id):
     form = AnswersForm()
     session = db_session.create_session()
     question = session.query(Questions).filter(Questions.id == id).first()
+    answers = session.query(Answers).filter(Answers.question_id == id)
     if question:
         user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
     else:
@@ -165,7 +169,8 @@ def question_page(id):
         session.commit()
         form.content.data = ''
 
-    return render_template('question_page.html', question=question, user=user, form=form)
+    return render_template('question_page.html', question=question,
+                           answers=answers, user=user, form=form)
 
 
 @app.route('/delete_answer/<int:id>', methods=['GET', 'POST'])
@@ -179,20 +184,6 @@ def delete_answer(id):
     else:
         abort(404)
     return redirect('/')
-
-
-# @app.route('/create_answer', methods=['GET', 'POST'])
-# @login_required
-# def create_answer():
-#     form = AnswersForm()
-#     if form.validate_on_submit():
-#         session = db_session.create_session()
-#         answer = Answers()
-#         answer.content = form.content.data
-#         current_user.answers.append(answer)
-#         session.merge(current_user)
-#         session.commit()
-#         return redirect('/')
 
 
 @app.errorhandler(404)

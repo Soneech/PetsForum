@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>{{ question.theme }}</h2>
-<h3>Автор - {{ user.name }}, <br> Дата написания - {{ question.created_date}}</h3>
+<h3>{{ question.theme }}</h3>
+<h4>Автор - {{ user.name }}, <br> Дата написания - {{ question.created_date}}</h4>
 <div class="col-md6 border rounded">
-    {{ question.content }}
+    <p>{{ question.content }}</p>
 </div>
-<br>
 <br>
 <form action="" method="post">
     {{ form.hidden_tag() }}
@@ -19,20 +18,20 @@
                 {{ error }}
             </p>
         {% endfor %}
+        {{ form.submit(type="submit", class="btn btn-primary") }}
+        {{message}}
     </p>
-    <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-    {{message}}
 </form>
 
 {% for item in answers %}
 <div class="col-md6 border rounded">
+    <h3>Автор - {{ item.user.name}} <br>Дата написания - {{ item.created_date}}</h3>
+    <p>{{ item.content }}</p>
     {% if current_user.is_authenticated and current_user == item.user%}
         <div>
             <a href="/delete_answer/{{ item.id }}" class="btn btn-danger">Удалить</a>
         </div>
     {% endif %}
-    <h3>{{ item.user.name}}</h3>
-    <h3>{{ item.content }}</h3>
 </div>
 {% endfor %}
 
