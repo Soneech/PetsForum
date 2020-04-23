@@ -145,7 +145,6 @@ def question_delete(id):
 
 
 @app.route('/question_page/<int:id>', methods=['GET', 'POST'])  # страница с вопросом и ответами
-@login_required
 def question_page(id):
     form = AnswersForm()
     session = db_session.create_session()

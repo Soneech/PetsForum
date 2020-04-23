@@ -7,8 +7,10 @@
         <a href="create_question" class="btn btn-secondary">Задать вопрос</a>
 {% endif %}
 
+
 {% for item in questions%}
-<div class="col-md6 border rounded">
+<br>
+<div class="col-md6 border rounded text-break">
     <h2>{{item.theme}}</h2>
     <div>
         {{item.content}}
@@ -16,13 +18,14 @@
     <div>
         Автор - {{item.user.name}}, Дата написания - {{item.created_date}}
     </div>
-    {% if current_user.is_authenticated and current_user == item.user %}
     <div>
+        {% if current_user.is_authenticated and current_user == item.user %}
         <a href="/edit_question/{{ item.id }}" class="btn btn-warning">Изменить</a>
         <a href="/delete_question/{{ item.id }}" class="btn btn-danger">Удалить</a>
+        {% endif %}
         <a href="/question_page/{{ item.id }}" class="btn btn-success">Открыть</a>
     </div>
-    {% endif %}
+
 </div>
 {% endfor %}
 {% endblock %}

@@ -1,38 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h3>{{ question.theme }}</h3>
-<h4>Автор - {{ user.name }}, <br> Дата написания - {{ question.created_date}}</h4>
-<div class="col-md6 border rounded">
-    <p>{{ question.content }}</p>
-</div>
-<br>
-<form action="" method="post">
-    {{ form.hidden_tag() }}
-    {{ form.csrf_token }}
-    <p>
-        {{ form.content.label }}<br>
-        {{ form.content(class="form-control") }}<br>
-        {% for error in form.content.errors %}
-            <p class="alert alert-danger" role="alert">
-                {{ error }}
-            </p>
-        {% endfor %}
-        {{ form.submit(type="submit", class="btn btn-primary") }}
-        {{message}}
-    </p>
-</form>
+<div class="text-break">
+    <h3>{{ question.theme }}</h3>
+    <h4>Автор - {{ user.name }}, <br> Дата написания - {{ question.created_date}}</h4>
+    <div class="col-md6 border rounded">
+        <p>{{ question.content }}</p>
+    </div>
+    <br>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
+        {% if current_user.is_authenticated %}
+        <p>
+            {{ form.content.label }}<br>
+            {{ form.content(class="form-control") }}<br>
+            {% for error in form.content.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+            {{ form.submit(type="submit", class="btn btn-primary") }}
+            {{message}}
+        </p>
+        {% endif %}
+    </form>
 
-{% for item in answers %}
-<div class="col-md6 border rounded">
-    <h3>Автор - {{ item.user.name}} <br>Дата написания - {{ item.created_date}}</h3>
-    <p>{{ item.content }}</p>
-    {% if current_user.is_authenticated and current_user == item.user%}
-        <div>
-            <a href="/delete_answer/{{ item.id }}" class="btn btn-danger">Удалить</a>
-        </div>
-    {% endif %}
+    {% for item in answers %}
+    <div class="col-md6 border rounded">
+        <h3>Автор - {{ item.user.name}} <br>Дата написания - {{ item.created_date}}</h3>
+        <p>{{ item.content }}</p>
+        {% if current_user.is_authenticated and current_user == item.user%}
+            <div>
+                <a href="/delete_answer/{{ item.id }}" class="btn btn-danger">Удалить</a>
+            </div>
+        {% endif %}
 </div>
 {% endfor %}
+</div>
 
 {% endblock %}
