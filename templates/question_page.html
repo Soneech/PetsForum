@@ -32,6 +32,7 @@
         <p>{{ item.content }}</p>
         {% if current_user.is_authenticated and current_user == item.user%}
             <div>
+                <a href="/edit_answer/{{ item.id }}" class="btn btn-warning">Изменить</a>
                 <a href="/delete_answer/{{ item.id }}" class="btn btn-danger">Удалить</a>
             </div>
         {% endif %}

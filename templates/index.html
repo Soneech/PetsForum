@@ -19,11 +19,11 @@
         Автор - {{item.user.name}}, Дата написания - {{item.created_date}}
     </div>
     <div>
+        <a href="/question_page/{{ item.id }}" class="btn btn-success">Открыть</a>
         {% if current_user.is_authenticated and current_user == item.user %}
         <a href="/edit_question/{{ item.id }}" class="btn btn-warning">Изменить</a>
         <a href="/delete_question/{{ item.id }}" class="btn btn-danger">Удалить</a>
         {% endif %}
-        <a href="/question_page/{{ item.id }}" class="btn btn-success">Открыть</a>
     </div>
 
 </div>

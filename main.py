@@ -22,10 +22,7 @@ def main():
 @app.route('/')
 def index():
     session = db_session.create_session()
-    if current_user.is_authenticated:
-        questions = session.query(Questions).filter(Questions.user == current_user)
-    else:
-        questions = session.query(Questions)
+    questions = session.query(Questions)
 
     return render_template("index.html", questions=questions)
 
@@ -183,6 +180,30 @@ def delete_answer(id):
     else:
         abort(404)
     return redirect('/')
+
+
+@app.route('/edit_answer/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_answer(id):
+    form = AnswersForm()
+    session = db_session.create_session()
+    answer = session.query(Answers).filter(Answers.id == id,
+                                           Answers.user_id == current_user.id).first()
+    if answer:
+        if request.method == 'GET':
+            form.content.data = answer.content
+        if form.validate_on_submit():
+            answer.content = form.content.data
+            form.content.data = ''
+            session.commit()
+    else:
+        abort(404)
+
+    question = session.query(Questions).filter(Questions.id == answer.question_id).first()
+    answers = session.query(Answers).filter(Answers.question_id == answer.question_id)
+    user = session.query(Users).filter(Users.id == question.user_id).first()
+    return render_template('question_page.html', question=question,
+                           answers=answers, user=user, form=form)
 
 
 @app.errorhandler(404)
