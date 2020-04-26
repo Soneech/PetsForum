@@ -1,12 +1,32 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Вопросы</h1>
+
+<br>
+<form action="" method="post">
+    {{ form.hidden_tag() }}
+    {{ form.csrf_token }}
+    <p>
+        {{ form.content.label }}
+        {{ form.content(class="form-control") }}
+        {% for error in form.content.errors %}
+            <p class="alert alert-danger" role="alert">
+                {{ error }}
+            </p>
+        {% endfor %}
+    {{ form.submit(type="submit", class="btn btn-primary") }}
+    {{message}}
+    </p>
+</form>
+<br>
+
+<h2>Вопросы</h2>
+<br>
 
 {% if current_user.is_authenticated %}
         <a href="create_question" class="btn btn-secondary">Задать вопрос</a>
 {% endif %}
-
+<br>
 
 {% for item in questions%}
 <br>

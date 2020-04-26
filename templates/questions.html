@@ -6,8 +6,8 @@
     {{ form.hidden_tag() }}
     {{ form.csrf_token }}
     <p>
-        {{ form.theme.label }}<br>
-        {{ form.theme(class="form-control") }}<br>
+        {{ form.theme.label }}
+        {{ form.theme(class="form-control") }}
         {% for error in form.theme.errors %}
             <p class="alert alert-danger" role="alert">
                 {{ error }}

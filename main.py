@@ -6,6 +6,7 @@ from data.users import Users
 from data.register import RegisterForm, LoginForm
 from data.questions import Questions, QuestionsForm
 from data.answers import Answers, AnswersForm
+from data.search_form import SearchForm
 
 
 app = Flask(__name__)
@@ -19,12 +20,23 @@ def main():
     app.run()
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
     session = db_session.create_session()
     questions = session.query(Questions)
+    form = SearchForm()
+    if form.validate_on_submit():  # поиск вопроса
+        req = form.content.data
+        form.content.data = ''
+        print(req)
+        questions = session.query(Questions).filter(Questions.content.like(f'%{req}%') |
+                                                    Questions.content.like(f'%{req}') |
+                                                    Questions.content.like(f'{req}%') |
+                                                    Questions.content.like(req))
+        for i in questions:
+            print(i.id, i.theme, i.content)
 
-    return render_template("index.html", questions=questions)
+    return render_template("index.html", questions=questions, form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -206,9 +218,14 @@ def edit_answer(id):
                            answers=answers, user=user, form=form)
 
 
+@app.route('/', methods=['GET', 'POST'])
+def search_question():
+    pass
+
+
+
 @app.errorhandler(404)
 def not_found(error):
-    form = QuestionsForm()
     return make_response(jsonify({'error': 'Not found'}), 404)
 
 
