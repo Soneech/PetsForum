@@ -24,14 +24,16 @@ def main():
 def index():
     session = db_session.create_session()
     questions = session.query(Questions)
+    print(type(questions))
     form = SearchForm()
     if form.validate_on_submit():  # поиск вопроса
-        req = form.content.data
+        req = form.content.data.lower()
         form.content.data = ''
-        print(req)
-        questions = session.query(Questions).filter(Questions.content.like(f'%{req}%'))
-        for i in questions:
-            print(i.id, i.theme, i.content)
+        res = []
+        for item in questions:
+            if req in item.content.lower() or req in item.theme.lower():
+                res.append(item)
+        questions = res.copy()
 
     return render_template("index.html", questions=questions, form=form)
 
