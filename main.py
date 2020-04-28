@@ -29,10 +29,7 @@ def index():
         req = form.content.data
         form.content.data = ''
         print(req)
-        questions = session.query(Questions).filter(Questions.content.like(f'%{req}%') |
-                                                    Questions.content.like(f'%{req}') |
-                                                    Questions.content.like(f'{req}%') |
-                                                    Questions.content.like(req))
+        questions = session.query(Questions).filter(Questions.content.like(f'%{req}%'))
         for i in questions:
             print(i.id, i.theme, i.content)
 
