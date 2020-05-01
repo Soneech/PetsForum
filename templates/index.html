@@ -1,23 +1,31 @@
 {% extends "base.html" %}
 
 {% block content %}
-
-<br>
-<form action="" method="post">
-    {{ form.hidden_tag() }}
-    {{ form.csrf_token }}
-    <p>
-        {{ form.content.label }}
-        {{ form.content(class="form-control") }}
-        {% for error in form.content.errors %}
-            <p class="alert alert-danger" role="alert">
-                {{ error }}
+<br><br>
+<nav class="navbar navbar-expand-lg bg-light">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link text-dark" href="#">Тут что-то будет<span class="sr-only">(current)</span></a>
+            </li>
+        </ul>
+        <form method="post" class="form-inline my-2 my-lg-0">
+            {{ form.hidden_tag() }}
+            {{ form.csrf_token }}
+            <p>
+                {{ form.content.label }}
+                {{ form.content(class="form-control mr-sm-2") }}
+                {% for error in form.content.errors %}
+                    <p class="alert alert-danger" role="alert">
+                        {{ error }}
+                    </p>
+                {% endfor %}
+                {{ form.submit(type="submit", class="btn btn-primary my-2 my-sm-0") }}
+                {{message}}
             </p>
-        {% endfor %}
-    {{ form.submit(type="submit", class="btn btn-primary") }}
-    {{message}}
-    </p>
-</form>
+        </form>
+    </div>
+</nav>
 <br>
 
 <h2>Вопросы</h2>

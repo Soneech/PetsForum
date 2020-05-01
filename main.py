@@ -23,17 +23,14 @@ def main():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     session = db_session.create_session()
-    questions = session.query(Questions)
-    print(type(questions))
+    questions = list(session.query(Questions))
+    questions.reverse()  # "сортировка" вопросов по дате написания (сначала самые новые)
     form = SearchForm()
     if form.validate_on_submit():  # поиск вопроса
         req = form.content.data.lower()
         form.content.data = ''
-        res = []
-        for item in questions:
-            if req in item.content.lower() or req in item.theme.lower():
-                res.append(item)
-        questions = res.copy()
+        # вопросы, удовлетворяющие поисковому запросу
+        questions = [q for q in questions if req in q.content.lower() or req in q.theme.lower()]
 
     return render_template("index.html", questions=questions, form=form)
 
@@ -98,9 +95,17 @@ def create_question():
     if form.validate_on_submit():
         session = db_session.create_session()
         question = Questions()
+
         question.theme = form.theme.data
         question.content = form.content.data
         current_user.questions.append(question)
+
+        if current_user.user_questions:  # обновление кол-ва заданных вопросов
+            current_user.user_questions += 1
+        else:
+            current_user.user_questions = 1
+        print(current_user.user_questions)
+
         session.merge(current_user)
         session.commit()
         return redirect('/')
@@ -133,8 +138,8 @@ def edit_question(id):
         else:
             abort(404)
     return render_template('questions.html', title='Редактирование вопроса', form=form)
-#
-#
+
+
 @app.route('/delete_question/<int:id>', methods=['GET', 'POST'])
 @login_required
 def question_delete(id):
@@ -152,7 +157,8 @@ def question_delete(id):
     return redirect('/')
 
 
-@app.route('/question_page/<int:id>', methods=['GET', 'POST'])  # страница с вопросом и ответами
+# страница с вопросом и ответами (здесь также реализовано создание ответа)
+@app.route('/question_page/<int:id>', methods=['GET', 'POST'])
 def question_page(id):
     form = AnswersForm()
     session = db_session.create_session()
@@ -166,12 +172,16 @@ def question_page(id):
     if form.validate_on_submit():
         session = db_session.create_session()
         question = session.query(Questions).filter(Questions.id == id).first()
-        user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
 
         answer = Answers()
         answer.content = form.content.data
         answer.question_id = id
         current_user.answers.append(answer)
+        if current_user.user_answers:  # обновление кол-ва ответов
+            current_user.user_answers += 1
+        else:
+            current_user.user_answers = 1
+
         session.merge(current_user)
         session.commit()
         form.content.data = ''
@@ -215,12 +225,6 @@ def edit_answer(id):
     user = session.query(Users).filter(Users.id == question.user_id).first()
     return render_template('question_page.html', question=question,
                            answers=answers, user=user, form=form)
-
-
-@app.route('/', methods=['GET', 'POST'])
-def search_question():
-    pass
-
 
 
 @app.errorhandler(404)
