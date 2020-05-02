@@ -150,11 +150,17 @@ def question_delete(id):
     session = db_session.create_session()
     question = session.query(Questions).filter(Questions.id == id,
                                       Questions.user == current_user).first()
+    user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
+
     if question:
         answers = session.query(Answers).filter(Answers.question_id == id)
         for item in answers:
+            user2 = session.query(Users).filter(Users.id == item.user_id).first()  # юзер, написавший ответ
+            user2.user_answers -= 1
             session.delete(item)
+
         session.delete(question)
+        user.user_questions -= 1
         session.commit()
     else:
         abort(404)
@@ -199,8 +205,10 @@ def question_page(id):
 def delete_answer(id):
     session = db_session.create_session()
     answer = session.query(Answers).filter(Answers.id == id, Answers.user == current_user).first()
+    user = session.query(Users).filter(Users.id == answer.user_id).first()
     if answer:
         session.delete(answer)
+        user.user_answers -= 1
         session.commit()
     else:
         abort(404)
