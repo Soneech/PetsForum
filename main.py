@@ -25,6 +25,11 @@ def index():
     session = db_session.create_session()
     questions = list(session.query(Questions))
     questions.reverse()  # "сортировка" вопросов по дате написания (сначала самые новые)
+
+    # for question in questions:  # отображение в ленте только части текста вопроса
+    #     if len(question.content) > 99:
+    #         question.content = question.content[:99] + '...'
+
     form = SearchForm()
     if form.validate_on_submit():  # поиск вопроса
         req = form.content.data.lower()
@@ -104,7 +109,6 @@ def create_question():
             current_user.user_questions += 1
         else:
             current_user.user_questions = 1
-        print(current_user.user_questions)
 
         session.merge(current_user)
         session.commit()
@@ -120,7 +124,7 @@ def edit_question(id):
     if request.method == "GET":
         session = db_session.create_session()
         question = session.query(Questions).filter(Questions.id == id,
-                                          Questions.user == current_user).first()
+                                                   Questions.user == current_user).first()
         if question:
             form.theme.data = question.theme
             form.content.data = question.content
@@ -129,7 +133,7 @@ def edit_question(id):
     if form.validate_on_submit():
         session = db_session.create_session()
         question = session.query(Questions).filter(Questions.id == id,
-                                          Questions.user == current_user).first()
+                                                   Questions.user == current_user).first()
         if question:
             question.theme = form.theme.data
             question.content = form.content.data
@@ -200,7 +204,7 @@ def delete_answer(id):
         session.commit()
     else:
         abort(404)
-    return redirect('/')
+    return redirect(f'/question_page/{answer.question_id}')
 
 
 @app.route('/edit_answer/<int:id>', methods=['GET', 'POST'])
@@ -229,7 +233,7 @@ def edit_answer(id):
 
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': 'Not found'}), 404)
+    return make_response(jsonify({'error': error}), 404)
 
 
 if __name__ == '__main__':
