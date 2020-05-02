@@ -44,7 +44,7 @@
         {{item.content}}
     </div>
     <div>
-        Автор - {{item.user.name}}, Дата написания - {{item.created_date}}
+        Автор - <a href="/profile/{{ item.user_id }}" class="text-dark">{{item.user.name}}</a>, Дата написания - {{item.created_date}}
     </div>
     <div>
         <a href="/question_page/{{ item.id }}" class="btn btn-success">Открыть</a>

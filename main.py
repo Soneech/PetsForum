@@ -231,6 +231,23 @@ def edit_answer(id):
                            answers=answers, user=user, form=form)
 
 
+@app.route('/messages_page', methods=['GET', 'POST'])
+@login_required
+def messages_page():
+    pass
+
+
+@app.route('/profile/<int:id>', methods=['GET'])
+def profile(id):
+    session = db_session.create_session()
+    user = session.query(Users).filter(Users.id == id).first()  # юзер, на страницу которого был произведён переход
+    if profile:
+        return render_template('profile.html', user=user)
+    else:
+        abort(404)
+        return redirect('/')
+
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': error}), 404)

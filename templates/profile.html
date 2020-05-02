@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content%}
+<br><br>
+<div class="col-md6 border rounded text-break">
+    <h2>{{ user.name }}</h2>
+    {% if user.about %}
+        <p>Немного о {{ user.name }}: {{ user.about }}</p>
+    {% endif %}
+
+    {% if current_user.is_authenticated and current_user == user %}
+        <p>Почта: {{ user.email }}</p>
+    {% endif %}
+
+    <p>Вопросы: {{ user.user_questions }}</p>
+    <p>Ответы: {{ user.user_answers }}</p>
+
+    {% if current_user.is_authenticated %}
+        <a href="/#" class="btn btn-success">Написать сообщение</a>
+    {% endif %}
+</div>
+
+{% endblock %}
