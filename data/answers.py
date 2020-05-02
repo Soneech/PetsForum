@@ -4,6 +4,7 @@ from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField
+from wtforms.validators import DataRequired
 
 from .db_session import SqlAlchemyBase
 
@@ -23,5 +24,5 @@ class Answers(SqlAlchemyBase, SerializerMixin):
 
 
 class AnswersForm(FlaskForm, SerializerMixin):
-    content = TextAreaField('Ответить')
+    content = TextAreaField('Ответить', validators=[DataRequired()])
     submit = SubmitField('Опубликовать')

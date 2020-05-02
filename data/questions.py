@@ -25,5 +25,5 @@ class Questions(SqlAlchemyBase, SerializerMixin):
 
 class QuestionsForm(FlaskForm, SerializerMixin):
     theme = StringField('Тема', validators=[DataRequired()])
-    content = TextAreaField('Вопрос')
+    content = TextAreaField('Вопрос', validators=[DataRequired()])
     submit = SubmitField('Опубликовать')
