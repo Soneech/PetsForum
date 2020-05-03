@@ -1,6 +1,5 @@
 import sqlalchemy
 import hashlib
-from . import db_session
 from sqlalchemy import orm
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -24,7 +23,8 @@ class Users(SqlAlchemyBase, UserMixin, SerializerMixin):
 
     questions = orm.relation('Questions', back_populates='user')
     answers = orm.relation('Answers', back_populates='user')
-    # messages = orm.relation('Messages', back_populates=['to_user', 'from_user'])
+    message = orm.relation('Messages', back_populates=['to_user', 'from_user'])
+    dialog_info = orm.relation('DialogsInfo', back_populates=['user_1, user_2'])
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
