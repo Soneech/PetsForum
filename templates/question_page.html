@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+<br><br>
 <div class="text-break">
-    <h3>{{ question.theme }}</h3>
-    <h4>Автор - {{ user.name }}, <br> Дата написания - {{ question.created_date}}</h4>
+    <h2>{{ question.theme }}</h2>
+    <h4>Автор - <a href="/profile/{{ user.id }}" class="text-dark">{{ user.name }}</a>, <br> Дата написания - {{ question.created_date}}</h4>
+    <br>
     <div class="col-md6 border rounded">
         <p>{{ question.content }}</p>
     </div>
@@ -28,7 +30,7 @@
 
     {% for item in answers %}
     <div class="col-md6 border rounded">
-        <h3>Автор - {{ item.user.name}} <br>Дата написания - {{ item.created_date}}</h3>
+        <h4>Автор - <a href="/profile/{{ item.user_id}}" class="text-dark">{{ item.user.name}}</a> <br>Дата написания - {{ item.created_date}}</h4>
         <p>{{ item.content }}</p>
         {% if current_user.is_authenticated and current_user == item.user%}
             <div>

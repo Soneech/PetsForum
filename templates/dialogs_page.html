@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br><br>
+<h2>Диалоги</h2>
+{% for item in dialogs %}
+<div class="col-md6 border rounded text-break">
+    {% if current_user.id == item.user_id_1 %}
+        <h2>{{ item.user_name_2 }}</h2>
+    {% else %}
+        <h2>{{ item.user_name_1 }}</h2>
+    {% endif %}
+    <a class="btn btn-success" href="/#">Открыть</a>
+</div>
+{% endfor %}
+{% endblock %}

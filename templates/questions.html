@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ title }}</h1>
+<br><br>
+<h2>{{ title }}</h2>
+<br>
 <form action="" method="post">
     {{ form.hidden_tag() }}
     {{ form.csrf_token }}
@@ -14,6 +16,7 @@
             </p>
         {% endfor %}
     </p>
+    <br>
     <p>
         {{ form.content.label }}<br>
         {{ form.content(class="form-control") }}<br>

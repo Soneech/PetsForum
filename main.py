@@ -7,6 +7,7 @@ from data.register import RegisterForm, LoginForm
 from data.questions import Questions, QuestionsForm
 from data.answers import Answers, AnswersForm
 from data.search_form import SearchForm
+from data.dialogs_info import DialogsInfo
 
 
 app = Flask(__name__)
@@ -239,16 +240,12 @@ def edit_answer(id):
                            answers=answers, user=user, form=form)
 
 
-@app.route('/messages_page', methods=['GET', 'POST'])
-@login_required
-def messages_page():
-    pass
-
-
 @app.route('/profile/<int:id>', methods=['GET'])
 def profile(id):
     session = db_session.create_session()
     user = session.query(Users).filter(Users.id == id).first()  # юзер, на страницу которого был произведён переход
+    # dialog1 = session.query(DialogsInfo).filter(DialogsInfo.user_id_1 == current_user.id)
+    # dialog2 = session.query(DialogsInfo).filter
     if profile:
         return render_template('profile.html', user=user)
     else:
@@ -256,9 +253,26 @@ def profile(id):
         return redirect('/')
 
 
+@app.route('/messages_page/<int:id>', methods=['GET', 'POST'])
+@login_required
+def messages_page(id):
+    pass
+
+
+@app.route('/dialogs_page', methods=['GET'])
+@login_required
+def dialogs_page():
+    session = db_session.create_session()
+    user = session.query(Users).filter(Users.id == current_user.id).first()
+    dialogs1 = list(session.query(DialogsInfo).filter(DialogsInfo.user_id_1 == user.id))
+    dialogs2 = list(session.query(DialogsInfo).filter(DialogsInfo.user_id_2 == user.id))
+    dialogs = dialogs1 + dialogs2  # filter почему-то нормально не мог обработать двойное условие, поэтому так
+    return render_template('dialogs_page.html', dialogs=dialogs)
+
+
 @app.errorhandler(404)
 def not_found(error):
-    return make_response(jsonify({'error': error}), 404)
+    return make_response(jsonify({'error': 'Not found'}), 404)
 
 
 if __name__ == '__main__':

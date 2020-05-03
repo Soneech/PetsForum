@@ -15,6 +15,7 @@ class Messages(SqlAlchemyBase, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     to_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     from_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    dialog_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('dialogs_info.id'))
     content = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
     created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
 
