@@ -18,8 +18,8 @@ class Users(SqlAlchemyBase, UserMixin, SerializerMixin):
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     about = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    user_questions = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
-    user_answers = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    user_questions = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+    user_answers = sqlalchemy.Column(sqlalchemy.Integer, default=0)
     rating = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
     questions = orm.relation('Questions', back_populates='user')

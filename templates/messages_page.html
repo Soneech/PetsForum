@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br><br>
+<div class="col-md6 border rounded modal-dialog-scrollable flex-column">
+    {% for item in messages %}
+        {% if item.from_id == current_user.id %}
+            <div class="w-100">
+                <p class="float-right">{{ item.created_date }}<br>{{ item.content }}</p>
+            </div>
+        {% else %}
+            <div class="w-100">
+                <p class="float-left">{{ item.created_date }}<br>{{ item.content }}</p>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+<form action="" method="post">
+        {{ form.hidden_tag() }}
+        {{ form.csrf_token }}
+        <p>
+            {{ form.content.label }}<br>
+            {{ form.content(class="form-control") }}<br>
+            {% for error in form.content.errors %}
+                <p class="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+            {{ form.submit(type="submit", class="btn btn-primary") }}
+            {{message}}
+        </p>
+    </form>
+{% endblock %}

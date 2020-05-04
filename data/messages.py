@@ -13,11 +13,13 @@ class Messages(SqlAlchemyBase, SerializerMixin):
     __tablename__ = 'messages'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    to_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
-    from_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    to_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'), nullable=False)
+    from_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'), nullable=False)
     dialog_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('dialogs_info.id'))
     content = sqlalchemy.Column(sqlalchemy.Text, nullable=False)
-    created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    created_date = sqlalchemy.Column(sqlalchemy.String,
+                                     default=datetime.datetime.today().strftime('%d.%m.%Y, %H:%M'))
+
 
     dialog = orm.relation('DialogsInfo')
 

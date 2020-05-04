@@ -8,6 +8,7 @@ from data.questions import Questions, QuestionsForm
 from data.answers import Answers, AnswersForm
 from data.search_form import SearchForm
 from data.dialogs_info import DialogsInfo
+from data.messages import Messages, MessageForm
 
 
 app = Flask(__name__)
@@ -197,8 +198,7 @@ def question_page(id):
         session.commit()
         form.content.data = ''
 
-    return render_template('question_page.html', question=question,
-                           answers=answers, user=user, form=form)
+    return render_template('question_page.html', question=question, answers=answers, user=user, form=form)
 
 
 @app.route('/delete_answer/<int:id>', methods=['GET', 'POST'])
@@ -244,8 +244,6 @@ def edit_answer(id):
 def profile(id):
     session = db_session.create_session()
     user = session.query(Users).filter(Users.id == id).first()  # юзер, на страницу которого был произведён переход
-    # dialog1 = session.query(DialogsInfo).filter(DialogsInfo.user_id_1 == current_user.id)
-    # dialog2 = session.query(DialogsInfo).filter
     if profile:
         return render_template('profile.html', user=user)
     else:
@@ -256,17 +254,50 @@ def profile(id):
 @app.route('/messages_page/<int:id>', methods=['GET', 'POST'])
 @login_required
 def messages_page(id):
-    pass
+    form = MessageForm()
+    session = db_session.create_session()
+    to_user = session.query(Users).filter(Users.id == id).first()  # юзер, которому собираемся написать
+    dialog = session.query(DialogsInfo).filter(((DialogsInfo.user_id_1 == to_user.id) |
+                                                      (DialogsInfo.user_id_2 == to_user.id)),
+                                                     ((DialogsInfo.user_id_2 == current_user.id) |
+                                                      (DialogsInfo.user_id_1 == current_user.id))).first()
+    if dialog:
+        messages = session.query(Messages).filter(((Messages.to_id == to_user.id) |
+                                                    (Messages.to_id == current_user.id)),
+                                                   ((Messages.from_id == current_user.id) |
+                                                    (Messages.from_id == to_user.id)))
+
+    else:  # создание диалога
+        dialog = DialogsInfo()
+        dialog.user_id_1 = current_user.id
+        dialog.user_id_2 = to_user.id
+        dialog.user_name_1 = current_user.name
+        dialog.user_name_2 = to_user.name
+        session.add(dialog)
+        session.commit()
+        return redirect(f'/messages_page/{id}')
+
+    if form.validate_on_submit():
+        print('submit')
+        message = Messages()
+        message.to_id = to_user.id
+        message.from_id = current_user.id
+        message.content = form.content.data
+        message.dialog_id = dialog.id
+        session.add(message)
+        session.commit()
+        return redirect(f'/messages_page/{id}')
+
+    return render_template('messages_page.html', form=form, messages=messages)
 
 
 @app.route('/dialogs_page', methods=['GET'])
 @login_required
 def dialogs_page():
     session = db_session.create_session()
-    user = session.query(Users).filter(Users.id == current_user.id).first()
-    dialogs1 = list(session.query(DialogsInfo).filter(DialogsInfo.user_id_1 == user.id))
-    dialogs2 = list(session.query(DialogsInfo).filter(DialogsInfo.user_id_2 == user.id))
-    dialogs = dialogs1 + dialogs2  # filter почему-то нормально не мог обработать двойное условие, поэтому так
+    dialogs = list(session.query(DialogsInfo).filter((DialogsInfo.user_id_1 == current_user.id) |
+                                                      (DialogsInfo.user_id_2 == current_user.id)))
+    dialogs.reverse()
     return render_template('dialogs_page.html', dialogs=dialogs)
 
 

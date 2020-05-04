@@ -7,10 +7,11 @@
 <div class="col-md6 border rounded text-break">
     {% if current_user.id == item.user_id_1 %}
         <h2>{{ item.user_name_2 }}</h2>
+        <a class="btn btn-success" href="/messages_page/{{ item.user_id_2 }}">Открыть</a>
     {% else %}
         <h2>{{ item.user_name_1 }}</h2>
+        <a class="btn btn-success" href="/messages_page/{{ item.user_id_1 }}">Открыть</a>
     {% endif %}
-    <a class="btn btn-success" href="/#">Открыть</a>
 </div>
 {% endfor %}
 {% endblock %}

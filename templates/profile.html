@@ -15,8 +15,8 @@
     <p>Вопросы: {{ user.user_questions }}</p>
     <p>Ответы: {{ user.user_answers }}</p>
 
-    {% if current_user.is_authenticated %}
-        <a href="/#" class="btn btn-success">Написать сообщение</a>
+    {% if current_user.is_authenticated and current_user.id != user.id %}
+        <a href="/messages_page/{{ user.id }}" class="btn btn-success">Написать сообщение</a>
     {% endif %}
 </div>
 
