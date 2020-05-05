@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, jsonify, make_response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import abort
+
 from data import db_session
 from data.users import Users
 from data.register import RegisterForm, LoginForm
