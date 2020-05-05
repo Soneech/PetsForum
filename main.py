@@ -22,15 +22,11 @@ def main():
     app.run()
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])  # страница со всеми вопросами + поиск
 def index():
     session = db_session.create_session()
     questions = list(session.query(Questions))
     questions.reverse()  # "сортировка" вопросов по дате написания (сначала самые новые)
-
-    # for question in questions:  # отображение в ленте только части текста вопроса
-    #     if len(question.content) > 99:
-    #         question.content = question.content[:99] + '...'
 
     form = SearchForm()
     if form.validate_on_submit():  # поиск вопроса
@@ -47,19 +43,22 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html',
+                                   title='Регистрация',
                                    form=form,
                                    message="Пароли не совпадают")
+
         session = db_session.create_session()
         if session.query(Users).filter(Users.email == form.email.data).first():
-            return render_template('register.html', title='Регистрация',
+            return render_template('register.html',
+                                   title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
-        user = Users(
-            email=form.email.data,
-            name=form.name.data,
-            about=form.about.data,
-        )
+        user = Users()
+        user.email = form.email.data
+        user.name = form.name.data
+        user.about = form.about.data
+
         user.set_password(form.password.data)
         session.add(user)
         session.commit()
@@ -95,22 +94,19 @@ def logout():
     return redirect("/")
 
 
-@app.route('/create_question',  methods=['GET', 'POST'])
+@app.route('/create_question',  methods=['GET', 'POST'])  # создание вопроса
 @login_required
 def create_question():
     form = QuestionsForm()
     if form.validate_on_submit():
         session = db_session.create_session()
         question = Questions()
-
         question.theme = form.theme.data
         question.content = form.content.data
-        current_user.questions.append(question)
 
-        if current_user.user_questions:  # обновление кол-ва заданных вопросов
-            current_user.user_questions += 1
-        else:
-            current_user.user_questions = 1
+        current_user.questions.append(question)
+        # обновление кол-ва заданных вопросов (для отображения информации в профиле)
+        current_user.user_questions += 1
 
         session.merge(current_user)
         session.commit()
@@ -119,23 +115,21 @@ def create_question():
                            form=form)
 
 
-@app.route('/edit_question/<int:id>', methods=['GET', 'POST'])
+@app.route('/edit_question/<int:ed_q_id>', methods=['GET', 'POST'])  # редактирование вопроса
 @login_required
-def edit_question(id):
+def edit_question(ed_q_id):
     form = QuestionsForm()
+    session = db_session.create_session()
+    question = session.query(Questions).filter(Questions.id == ed_q_id,
+                                               Questions.user == current_user).first()  # сам вопрос
     if request.method == "GET":
-        session = db_session.create_session()
-        question = session.query(Questions).filter(Questions.id == id,
-                                                   Questions.user == current_user).first()
         if question:
-            form.theme.data = question.theme
+            form.theme.data = question.theme  # отображение контента в поле для редактирования
             form.content.data = question.content
         else:
             abort(404)
+
     if form.validate_on_submit():
-        session = db_session.create_session()
-        question = session.query(Questions).filter(Questions.id == id,
-                                                   Questions.user == current_user).first()
         if question:
             question.theme = form.theme.data
             question.content = form.content.data
@@ -146,17 +140,17 @@ def edit_question(id):
     return render_template('questions.html', title='Редактирование вопроса', form=form)
 
 
-@app.route('/delete_question/<int:id>', methods=['GET', 'POST'])
+@app.route('/delete_question/<int:del_q_id>', methods=['GET', 'POST'])  # удаление вопроса
 @login_required
-def question_delete(id):
+def question_delete(del_q_id):
     session = db_session.create_session()
-    question = session.query(Questions).filter(Questions.id == id,
-                                      Questions.user == current_user).first()
+    question = session.query(Questions).filter(Questions.id == del_q_id,
+                                               Questions.user == current_user).first()
     user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
 
     if question:
-        answers = session.query(Answers).filter(Answers.question_id == id)
-        for item in answers:
+        answers = session.query(Answers).filter(Answers.question_id == del_q_id)
+        for item in answers:  # удаление ответов к вопросу
             user2 = session.query(Users).filter(Users.id == item.user_id).first()  # юзер, написавший ответ
             user2.user_answers -= 1
             session.delete(item)
@@ -170,63 +164,57 @@ def question_delete(id):
 
 
 # страница с вопросом и ответами (здесь также реализовано создание ответа)
-@app.route('/question_page/<int:id>', methods=['GET', 'POST'])
-def question_page(id):
-    form = AnswersForm()
+@app.route('/question_page/<int:q_page_id>', methods=['GET', 'POST'])
+def question_page(q_page_id):
+    form = AnswersForm()  # поле для ответа
     session = db_session.create_session()
-    question = session.query(Questions).filter(Questions.id == id).first()
-    answers = session.query(Answers).filter(Answers.question_id == id)
+    question = session.query(Questions).filter(Questions.id == q_page_id).first()  # сам вопрос
+    answers = session.query(Answers).filter(Answers.question_id == q_page_id)  # ответы к нему
     if question:
         user = session.query(Users).filter(Users.id == question.user_id).first()  # юзер, задавший вопрос
     else:
         abort(404)
 
     if form.validate_on_submit():
-        session = db_session.create_session()
-        question = session.query(Questions).filter(Questions.id == id).first()
-
         answer = Answers()
         answer.content = form.content.data
-        answer.question_id = id
+        answer.question_id = q_page_id
+
         current_user.answers.append(answer)
-        if current_user.user_answers:  # обновление кол-ва ответов
-            current_user.user_answers += 1
-        else:
-            current_user.user_answers = 1
+        current_user.user_answers += 1  # обновление кол-ва ответов
 
         session.merge(current_user)
         session.commit()
         form.content.data = ''
-
     return render_template('question_page.html', question=question, answers=answers, user=user, form=form)
 
 
-@app.route('/delete_answer/<int:id>', methods=['GET', 'POST'])
+@app.route('/delete_answer/<int:del_ans_id>', methods=['GET', 'POST'])  # удаление ответа
 @login_required
-def delete_answer(id):
+def delete_answer(del_ans_id):
     session = db_session.create_session()
-    answer = session.query(Answers).filter(Answers.id == id, Answers.user == current_user).first()
-    user = session.query(Users).filter(Users.id == answer.user_id).first()
+    answer = session.query(Answers).filter(Answers.id == del_ans_id, Answers.user == current_user).first()  # сам ответ
+    user = session.query(Users).filter(Users.id == answer.user_id).first()  # юзер, написавший ответ
     if answer:
         session.delete(answer)
-        user.user_answers -= 1
+        user.user_answers -= 1  # обновление кол-ва ответов
         session.commit()
     else:
         abort(404)
     return redirect(f'/question_page/{answer.question_id}')
 
 
-@app.route('/edit_answer/<int:id>', methods=['GET', 'POST'])
+@app.route('/edit_answer/<int:ed_ans_id>', methods=['GET', 'POST'])  # редактирование ответа
 @login_required
-def edit_answer(id):
+def edit_answer(ed_ans_id):
     form = AnswersForm()
     session = db_session.create_session()
-    answer = session.query(Answers).filter(Answers.id == id,
+    answer = session.query(Answers).filter(Answers.id == ed_ans_id,
                                            Answers.user_id == current_user.id).first()
     if answer:
         if request.method == 'GET':
-            form.content.data = answer.content
-        if form.validate_on_submit():
+            form.content.data = answer.content  # отображение контента в поле для редактироания
+        if form.validate_on_submit():  # обновление ответа
             answer.content = form.content.data
             form.content.data = ''
             session.commit()
@@ -240,10 +228,10 @@ def edit_answer(id):
                            answers=answers, user=user, form=form)
 
 
-@app.route('/profile/<int:id>', methods=['GET'])
-def profile(id):
+@app.route('/profile/<int:p_id>', methods=['GET'])  # страница профиля
+def profile(p_id):
     session = db_session.create_session()
-    user = session.query(Users).filter(Users.id == id).first()  # юзер, на страницу которого был произведён переход
+    user = session.query(Users).filter(Users.id == p_id).first()  # юзер, на страницу которого был произведён переход
     if profile:
         return render_template('profile.html', user=user)
     else:
@@ -251,21 +239,21 @@ def profile(id):
         return redirect('/')
 
 
-@app.route('/messages_page/<int:id>', methods=['GET', 'POST'])
+@app.route('/messages_page/<int:user_id>', methods=['GET', 'POST'])  # страница диалога
 @login_required
-def messages_page(id):
-    form = MessageForm()
+def messages_page(user_id):
+    form = MessageForm()  # поле для сообщения
     session = db_session.create_session()
-    to_user = session.query(Users).filter(Users.id == id).first()  # юзер, которому собираемся написать
+    to_user = session.query(Users).filter(Users.id == user_id).first()  # юзер, которому собираемся написать
     dialog = session.query(DialogsInfo).filter(((DialogsInfo.user_id_1 == to_user.id) |
-                                                      (DialogsInfo.user_id_2 == to_user.id)),
-                                                     ((DialogsInfo.user_id_2 == current_user.id) |
-                                                      (DialogsInfo.user_id_1 == current_user.id))).first()
+                                                (DialogsInfo.user_id_2 == to_user.id)),
+                                               ((DialogsInfo.user_id_2 == current_user.id) |
+                                                (DialogsInfo.user_id_1 == current_user.id))).first()
     if dialog:
         messages = session.query(Messages).filter(((Messages.to_id == to_user.id) |
-                                                    (Messages.to_id == current_user.id)),
-                                                   ((Messages.from_id == current_user.id) |
-                                                    (Messages.from_id == to_user.id)))
+                                                   (Messages.to_id == current_user.id)),
+                                                  ((Messages.from_id == current_user.id) |
+                                                   (Messages.from_id == to_user.id)))
 
     else:  # создание диалога
         dialog = DialogsInfo()
@@ -273,30 +261,31 @@ def messages_page(id):
         dialog.user_id_2 = to_user.id
         dialog.user_name_1 = current_user.name
         dialog.user_name_2 = to_user.name
+
         session.add(dialog)
         session.commit()
-        return redirect(f'/messages_page/{id}')
+        return redirect(f'/messages_page/{user_id}')
 
     if form.validate_on_submit():
-        print('submit')
         message = Messages()
         message.to_id = to_user.id
         message.from_id = current_user.id
         message.content = form.content.data
         message.dialog_id = dialog.id
+
         session.add(message)
         session.commit()
-        return redirect(f'/messages_page/{id}')
+        return redirect(f'/messages_page/{user_id}')
 
-    return render_template('messages_page.html', form=form, messages=messages)
+    return render_template('messages_page.html', form=form, messages=messages, to_user=to_user)
 
 
-@app.route('/dialogs_page', methods=['GET'])
+@app.route('/dialogs_page', methods=['GET'])  # страница со всеми диалогами
 @login_required
 def dialogs_page():
     session = db_session.create_session()
     dialogs = list(session.query(DialogsInfo).filter((DialogsInfo.user_id_1 == current_user.id) |
-                                                      (DialogsInfo.user_id_2 == current_user.id)))
+                                                     (DialogsInfo.user_id_2 == current_user.id)))
     dialogs.reverse()
     return render_template('dialogs_page.html', dialogs=dialogs)
 

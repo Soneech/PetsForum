@@ -2,6 +2,8 @@
 
 {% block content %}
 <br><br>
+<h2>{{ to_user.name }}</h2>
+<br>
 <div class="col-md6 border rounded modal-dialog-scrollable flex-column">
     {% for item in messages %}
         {% if item.from_id == current_user.id %}

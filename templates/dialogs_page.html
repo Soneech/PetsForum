@@ -3,6 +3,7 @@
 {% block content %}
 <br><br>
 <h2>Диалоги</h2>
+<br>
 {% for item in dialogs %}
 <div class="col-md6 border rounded text-break">
     {% if current_user.id == item.user_id_1 %}
