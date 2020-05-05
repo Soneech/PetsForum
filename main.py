@@ -1,6 +1,7 @@
 from flask import Flask, render_template, redirect, jsonify, make_response, request
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_restful import abort
+import os
 
 from data import db_session
 from data.users import Users
@@ -20,7 +21,8 @@ login_manager.init_app(app)
 
 def main():
     db_session.global_init('db/info.sqlite')
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
 
 
 @app.route('/', methods=['GET', 'POST'])  # страница со всеми вопросами + поиск
