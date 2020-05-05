@@ -26,7 +26,8 @@ def main():
 def index():
     session = db_session.create_session()
     questions = list(session.query(Questions))
-    questions.reverse()  # "сортировка" вопросов по дате написания (сначала самые новые)
+    if questions:
+        questions.reverse()  # "сортировка" вопросов по дате написания (сначала самые новые)
 
     form = SearchForm()
     if form.validate_on_submit():  # поиск вопроса
@@ -36,6 +37,38 @@ def index():
         questions = [q for q in questions if req in q.content.lower() or req in q.theme.lower()]
 
     return render_template("index.html", questions=questions, form=form)
+
+
+# при нажатии на "Мои вопросы" на главной странице отображает вопросы пользователя
+@app.route('/my_questions', methods=['GET', 'POST'])
+@login_required
+def my_questions():
+    form = SearchForm()
+
+    session = db_session.create_session()
+    questions = list(session.query(Questions).filter(Questions.user_id == current_user.id))
+    if questions:
+        questions.reverse()
+
+    return render_template('index.html', questions=questions, form=form)
+
+
+# при нажатии на "Вопросы с моими ответами" на гл. странице отображате соответсткующие вопросы
+@app.route('/questions_with_my_answers', methods=['GET', 'POST'])
+@login_required
+def questions_with_my_answers():
+    form = SearchForm()
+
+    session = db_session.create_session()
+    answers = session.query(Answers).filter(Answers.user_id == current_user.id)
+    questions = []
+    for ans in answers:
+        questions.append(session.query(Questions).filter(Questions.id == ans.question_id).first())
+
+    if questions:
+        questions.reverse()
+
+    return render_template('index.html', questions=questions, form=form)
 
 
 @app.route('/register', methods=['GET', 'POST'])

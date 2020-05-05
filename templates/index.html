@@ -6,7 +6,19 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
-                <a class="nav-link text-dark" href="#">Тут что-то будет<span class="sr-only">(current)</span></a>
+                {% if current_user.is_authenticated %}
+                    <a class="nav-link text-dark" href="/my_questions">Мои вопросы<span class="sr-only">(current)</span></a>
+                {% endif %}
+            </li>
+            <li class="nav-item active">
+                {% if current_user.is_authenticated %}
+                    <p class="nav-link text-dark">|</p>
+                {% endif %}
+            </li>
+            <li class="nav-item active">
+                {% if current_user.is_authenticated %}
+                    <a class="nav-link text-dark" href="/questions_with_my_answers">Вопросы с моими ответами<span class="sr-only">(current)</span></a>
+                {% endif %}
             </li>
         </ul>
         <form method="post" class="form-inline my-2 my-lg-0">
